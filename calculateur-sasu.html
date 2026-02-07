@@ -1,0 +1,869 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculateur SASU</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --midnight: #0a0e27;
+            --charcoal: #1a1f3a;
+            --slate: #2d3454;
+            --accent-gold: #d4af37;
+            --accent-blue: #4a9eff;
+            --accent-green: #00d4aa;
+            --accent-red: #ff6b6b;
+            --text-primary: #e8eaf6;
+            --text-secondary: #9ca3af;
+            --border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: linear-gradient(135deg, var(--midnight) 0%, var(--charcoal) 100%);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding: 2rem;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 20%, rgba(74, 158, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(212, 175, 55, 0.05) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 3rem;
+            animation: fadeInDown 0.8s ease-out;
+        }
+
+        h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 3.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--accent-gold) 0%, var(--accent-blue) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.02em;
+        }
+
+        .subtitle {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            font-weight: 400;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .card {
+            background: rgba(42, 47, 74, 0.6);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 2rem;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            animation: fadeInUp 0.8s ease-out backwards;
+        }
+
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .card:nth-child(1) { animation-delay: 0.1s; }
+        .card:nth-child(2) { animation-delay: 0.2s; }
+        .card:nth-child(3) { animation-delay: 0.3s; }
+        .card:nth-child(4) { animation-delay: 0.4s; }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .card-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .card-icon {
+            font-size: 1.5rem;
+        }
+
+        .input-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 0.875rem 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 1rem;
+            font-family: 'DM Sans', sans-serif;
+            transition: all 0.3s ease;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--accent-blue);
+            background: rgba(74, 158, 255, 0.1);
+            box-shadow: 0 0 0 3px rgba(74, 158, 255, 0.1);
+        }
+
+        input[type="number"]::-webkit-inner-spin-button,
+        input[type="number"]::-webkit-outer-spin-button {
+            opacity: 1;
+        }
+
+        .metric {
+            margin-bottom: 1.5rem;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 8px;
+            border-left: 3px solid var(--accent-blue);
+        }
+
+        .metric-label {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.5rem;
+        }
+
+        .metric-value {
+            font-size: 1.75rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .metric.positive {
+            border-left-color: var(--accent-green);
+        }
+
+        .metric.negative {
+            border-left-color: var(--accent-red);
+        }
+
+        .metric.highlight {
+            border-left-color: var(--accent-gold);
+            background: rgba(212, 175, 55, 0.05);
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .summary-item {
+            background: rgba(255, 255, 255, 0.03);
+            padding: 1rem;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .summary-label {
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .summary-value {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .slider-group {
+            margin-top: 1rem;
+        }
+
+        .slider {
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            background: var(--accent-blue);
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(74, 158, 255, 0.5);
+            transition: all 0.3s ease;
+        }
+
+        .slider::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+            box-shadow: 0 4px 12px rgba(74, 158, 255, 0.7);
+        }
+
+        .slider::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            background: var(--accent-blue);
+            border-radius: 50%;
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 2px 8px rgba(74, 158, 255, 0.5);
+        }
+
+        .slider-labels {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 0.5rem;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+        }
+
+        .tax-breakdown {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .tax-rate {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-bottom: 0.75rem;
+            font-weight: 500;
+        }
+
+        .tax-rate span {
+            color: var(--accent-blue);
+            font-weight: 600;
+        }
+
+        .tax-details {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .tax-bracket {
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+            padding: 0.4rem 0.75rem;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 4px;
+            border-left: 2px solid rgba(74, 158, 255, 0.3);
+            font-family: 'DM Sans', monospace;
+        }
+
+        .info-icon {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            background: rgba(74, 158, 255, 0.2);
+            border-radius: 50%;
+            text-align: center;
+            line-height: 16px;
+            font-size: 0.7rem;
+            color: var(--accent-blue);
+            cursor: help;
+            margin-left: 0.5rem;
+            position: relative;
+        }
+
+        .info-icon:hover {
+            background: rgba(74, 158, 255, 0.3);
+        }
+
+        .tooltip {
+            visibility: hidden;
+            position: absolute;
+            z-index: 1000;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--slate);
+            color: var(--text-primary);
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            width: 280px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+            border: 1px solid var(--border-color);
+            line-height: 1.4;
+            text-align: left;
+            font-weight: 400;
+        }
+
+        .tooltip::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 6px solid transparent;
+            border-top-color: var(--slate);
+        }
+
+        .info-icon:hover .tooltip {
+            visibility: visible;
+        }
+
+        .tooltip ul {
+            margin: 0.5rem 0 0 0;
+            padding-left: 1.2rem;
+        }
+
+        .tooltip li {
+            margin: 0.25rem 0;
+            color: var(--text-secondary);
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+
+            h1 {
+                font-size: 2.5rem;
+            }
+
+            body {
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Calculateur Revenu SASU</h1>
+            <p class="subtitle"></p>
+        </header>
+
+        <div class="grid">
+            <!-- Paramètres -->
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Paramètres</h2>
+                    <span class="card-icon">⚙️</span>
+                </div>
+                <div class="input-group">
+                    <label for="tj">Taux Journalier (€)</label>
+                    <input type="number" id="tj" value="800" min="0" step="10">
+                </div>
+                <div class="input-group">
+                    <label for="jours">Jours travaillés / an</label>
+                    <input type="number" id="jours" value="210" min="0" max="365">
+                </div>
+                <div class="input-group">
+                    <label for="frais">
+                        Frais professionnels annuels (€)
+                        <span class="info-icon">ℹ
+                            <span class="tooltip">
+                                <strong>Frais refacturables :</strong>
+                                <ul>
+                                    <li>Déplacements clients (train, avion, hôtel)</li>
+                                    <li>Repas d'affaires</li>
+                                    <li>Matériel informatique</li>
+                                    <li>Fournitures et consommables</li>
+                                    <li>Location bureaux/coworking</li>
+                                </ul>
+                            </span>
+                        </span>
+                    </label>
+                    <input type="number" id="frais" value="0" min="0" step="500">
+                </div>
+                <div class="input-group">
+                    <label for="charges">
+                        Charges de structure annuelles (€)
+                        <span class="info-icon">ℹ
+                            <span class="tooltip">
+                                <strong>Charges fixes de la SASU :</strong>
+                                <ul>
+                                    <li>Indy (708€)</li>
+                                    <li>Assurances pro (RC Pro, etc.)</li>
+                                    <li>Frais bancaires (compte pro) - 0€</li>
+                                    <li>CFE (exonérée année 1)</li>
+                                    <li>Abonnements SaaS professionnels - 0€</li>
+                                    <li>Cotisations professionnelles - ??€</li>
+                                </ul>
+                            </span>
+                        </span>
+                    </label>
+                    <input type="number" id="charges" value="708" min="0" step="500">
+                </div>
+                <div class="input-group">
+                    <label for="acre">Bénéficiez-vous de l'ACRE ?</label>
+                    <select id="acre">
+                        <option value="non">Non</option>
+                        <option value="oui">Oui (Année 1 - 50% de réduction de charge)</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Résultat d'exploitation -->
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Exploitation</h2>
+                    <span class="card-icon">📊</span>
+                </div>
+                <div class="metric highlight">
+                    <div class="metric-label">Chiffre d'Affaires</div>
+                    <div class="metric-value" id="ca">160 000 €</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Charges totales</div>
+                    <div class="metric-value" id="charges-total">7 000 €</div>
+                </div>
+                <div class="metric positive">
+                    <div class="metric-label">Résultat avant IS</div>
+                    <div class="metric-value" id="resultat-avant-is">153 000 €</div>
+                </div>
+            </div>
+
+            <!-- Impôt sur les Sociétés -->
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Impôt sur les Sociétés</h2>
+                    <span class="card-icon">🏛️</span>
+                </div>
+                <div class="summary-grid">
+                    <div class="summary-item">
+                        <div class="summary-label">IS à 15%</div>
+                        <div class="summary-value" id="is-15">6 375 €</div>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-label">IS à 25%</div>
+                        <div class="summary-value" id="is-25">27 625 €</div>
+                    </div>
+                </div>
+                <div class="metric negative">
+                    <div class="metric-label">IS Total</div>
+                    <div class="metric-value" id="is-total">34 000 €</div>
+                </div>
+                <div class="metric positive">
+                    <div class="metric-label">Résultat net après IS</div>
+                    <div class="metric-value" id="resultat-apres-is">119 000 €</div>
+                </div>
+            </div>
+
+            <!-- Répartition Salaire / Dividendes -->
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Rémunération</h2>
+                    <span class="card-icon">💰</span>
+                </div>
+                <div class="input-group">
+                    <label for="repartition">Salaire brut annuel (€)</label>
+                    <input type="number" id="salaire-brut" value="40000" min="0" step="1000">
+                </div>
+                <div class="metric">
+                    <div class="metric-label" id="charges-label">Charges sociales (82%)</div>
+                    <div class="metric-value" id="charges-sociales">32 800 €</div>
+                </div>
+                <div class="metric positive">
+                    <div class="metric-label">Salaire net avant IR</div>
+                    <div class="metric-value" id="salaire-net">29 200 €</div>
+                </div>
+                <div class="metric negative">
+                    <div class="metric-label">IR sur salaire</div>
+                    <div class="metric-value" id="ir-salaire">1 705 €</div>
+                    <div class="tax-breakdown">
+                        <div class="tax-rate">Taux effectif : <span id="taux-effectif">5.8%</span></div>
+                        <div class="tax-details" id="tax-details">
+                            <div class="tax-bracket">0% jusqu'à 10 777€ : 0€</div>
+                            <div class="tax-bracket">11% de 10 777€ à 27 478€ : 1 705€</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="summary-grid" style="margin-top: 1.5rem;">
+                    <div class="summary-item">
+                        <div class="summary-label">Net mensuel avant IR</div>
+                        <div class="summary-value" id="salaire-mensuel-avant-ir">2 433 €</div>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-label">Net mensuel après IR</div>
+                        <div class="summary-value" id="salaire-mensuel-apres-ir">2 291 €</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Résumé Fiscal -->
+        <div class="card" style="animation-delay: 0.5s;">
+            <div class="card-header">
+                <h2 class="card-title">Fiscalité Globale</h2>
+                <span class="card-icon">🧾</span>
+            </div>
+            <div class="metric highlight">
+                <div class="metric-label">Total des impôts et taxes</div>
+                <div class="metric-value" id="total-impots">50 565 €</div>
+            </div>
+            <div class="summary-grid" style="margin-top: 1.5rem;">
+                <div class="summary-item">
+                    <div class="summary-label">Impôt sur les Sociétés</div>
+                    <div class="summary-value" id="recap-is">34 000 €</div>
+                    <div class="tax-breakdown" style="margin-top: 0.5rem; padding-top: 0.5rem; border-top: 1px solid rgba(255,255,255,0.05);">
+                        <div class="tax-bracket" style="font-size: 0.75rem;">15% × <span id="recap-is-15-base">42 500€</span> = <span id="recap-is-15-montant">6 375€</span></div>
+                        <div class="tax-bracket" style="font-size: 0.75rem;">25% × <span id="recap-is-25-base">110 500€</span> = <span id="recap-is-25-montant">27 625€</span></div>
+                    </div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-label">Impôt sur le Revenu</div>
+                    <div class="summary-value" id="recap-ir">1 705 €</div>
+                    <div class="tax-breakdown" style="margin-top: 0.5rem; padding-top: 0.5rem; border-top: 1px solid rgba(255,255,255,0.05);">
+                        <div class="tax-bracket" style="font-size: 0.75rem;">Taux effectif : <span id="recap-taux-effectif">5.8%</span></div>
+                        <div class="tax-bracket" style="font-size: 0.75rem;">Sur salaire net : <span id="recap-salaire-base">29 200€</span></div>
+                    </div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-label">Flat Tax (dividendes)</div>
+                    <div class="summary-value" id="recap-flat-tax">13 860 €</div>
+                    <div class="tax-breakdown" style="margin-top: 0.5rem; padding-top: 0.5rem; border-top: 1px solid rgba(255,255,255,0.05);">
+                        <div class="tax-bracket" style="font-size: 0.75rem;">31.4% × <span id="recap-dividendes-base">46 200€</span></div>
+                        <div class="tax-bracket" style="font-size: 0.75rem;">18.6% PS + 12.8% IR</div>
+                    </div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-label">Charges sociales</div>
+                    <div class="summary-value" id="recap-charges">32 800 €</div>
+                    <div class="tax-breakdown" style="margin-top: 0.5rem; padding-top: 0.5rem; border-top: 1px solid rgba(255,255,255,0.05);">
+                        <div class="tax-bracket" style="font-size: 0.75rem;"><span id="recap-taux-charges">82%</span> × <span id="recap-salaire-brut">40 000€</span></div>
+                    </div>
+                </div>
+            </div>
+            <div class="metric" style="margin-top: 1.5rem; background: rgba(212, 175, 55, 0.05); border-left-color: var(--accent-gold);">
+                <div class="metric-label">Taux d'imposition global (sur CA)</div>
+                <div class="metric-value" id="taux-global">31.6%</div>
+            </div>
+        </div>
+
+        <!-- Résumé Final -->
+        <div class="card" style="animation-delay: 0.6s;">
+            <div class="card-header">
+                <h2 class="card-title">Résumé Final</h2>
+                <span class="card-icon">✨</span>
+            </div>
+            <div class="summary-grid">
+                <div class="summary-item">
+                    <div class="summary-label">Dividendes disponibles</div>
+                    <div class="summary-value" id="dividendes-bruts">46 200 €</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-label">Flat Tax (31.6%)</div>
+                    <div class="summary-value" id="flat-tax">13 860 €</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-label">Dividendes nets</div>
+                    <div class="summary-value" id="dividendes-nets">32 340 €</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-label">Salaire net après IR</div>
+                    <div class="summary-value" id="salaire-net-final">27 495 €</div>
+                </div>
+            </div>
+            <div class="metric highlight" style="margin-top: 1.5rem;">
+                <div class="metric-label">Revenu net total disponible</div>
+                <div class="metric-value" id="revenu-total">59 835 €</div>
+            </div>
+            <div class="metric" style="margin-top: 1rem; border-left-color: var(--accent-gold);">
+                <div class="metric-label">Revenu mensuel moyen</div>
+                <div class="metric-value" id="revenu-mensuel">4 986 €</div>
+            </div>
+        </div>
+
+        <footer>
+            <p>Calculateur indicatif · Les taux et barèmes peuvent évoluer · Consultez votre expert-comptable</p>
+        </footer>
+    </div>
+
+    <script>
+        // Fonction de formatage
+        function formatEuro(value) {
+            return new Intl.NumberFormat('fr-FR', {
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0
+            }).format(value) + ' €';
+        }
+
+        // Calcul de l'IR simplifié (barème 2024, estimation)
+        function calculerIR(revenuNet) {
+            // Abattement de 10% pour frais professionnels
+            const revenuImposable = revenuNet * 0.9;
+            
+            // Barème progressif simplifié (pour 1 part)
+            let ir = 0;
+            let details = [];
+            
+            if (revenuImposable <= 10777) {
+                ir = 0;
+                details.push({ tranche: '0%', min: 0, max: 10777, montant: 0 });
+            } else if (revenuImposable <= 27478) {
+                const t1 = (revenuImposable - 10777) * 0.11;
+                ir = t1;
+                details.push({ tranche: '0%', min: 0, max: 10777, montant: 0 });
+                details.push({ tranche: '11%', min: 10777, max: 27478, montant: t1 });
+            } else if (revenuImposable <= 78570) {
+                const t1 = (27478 - 10777) * 0.11;
+                const t2 = (revenuImposable - 27478) * 0.30;
+                ir = t1 + t2;
+                details.push({ tranche: '0%', min: 0, max: 10777, montant: 0 });
+                details.push({ tranche: '11%', min: 10777, max: 27478, montant: t1 });
+                details.push({ tranche: '30%', min: 27478, max: 78570, montant: t2 });
+            } else if (revenuImposable <= 168994) {
+                const t1 = (27478 - 10777) * 0.11;
+                const t2 = (78570 - 27478) * 0.30;
+                const t3 = (revenuImposable - 78570) * 0.41;
+                ir = t1 + t2 + t3;
+                details.push({ tranche: '0%', min: 0, max: 10777, montant: 0 });
+                details.push({ tranche: '11%', min: 10777, max: 27478, montant: t1 });
+                details.push({ tranche: '30%', min: 27478, max: 78570, montant: t2 });
+                details.push({ tranche: '41%', min: 78570, max: 168994, montant: t3 });
+            } else {
+                const t1 = (27478 - 10777) * 0.11;
+                const t2 = (78570 - 27478) * 0.30;
+                const t3 = (168994 - 78570) * 0.41;
+                const t4 = (revenuImposable - 168994) * 0.45;
+                ir = t1 + t2 + t3 + t4;
+                details.push({ tranche: '0%', min: 0, max: 10777, montant: 0 });
+                details.push({ tranche: '11%', min: 10777, max: 27478, montant: t1 });
+                details.push({ tranche: '30%', min: 27478, max: 78570, montant: t2 });
+                details.push({ tranche: '41%', min: 78570, max: 168994, montant: t3 });
+                details.push({ tranche: '45%', min: 168994, max: Infinity, montant: t4 });
+            }
+            
+            return {
+                total: Math.max(0, ir),
+                details: details,
+                tauxEffectif: revenuNet > 0 ? (ir / revenuNet * 100) : 0
+            };
+        }
+
+        function calculer() {
+            // Récupération des paramètres
+            const tj = parseFloat(document.getElementById('tj').value) || 0;
+            const jours = parseFloat(document.getElementById('jours').value) || 0;
+            const frais = parseFloat(document.getElementById('frais').value) || 0;
+            const autresCharges = parseFloat(document.getElementById('charges').value) || 0;
+            const salaireBrut = parseFloat(document.getElementById('salaire-brut').value) || 0;
+            const acre = document.getElementById('acre').value;
+
+            // Calcul du CA
+            const ca = tj * jours;
+            document.getElementById('ca').textContent = formatEuro(ca);
+
+            // Calcul des charges sociales
+            // ACRE réduit les charges patronales de 50% la première année
+            const tauxCharges = acre === 'oui' ? 0.41 : 0.82;
+            const chargesSociales = salaireBrut * tauxCharges;
+            const salaireNet = salaireBrut * 0.73; // Environ 27% de charges salariales (inchangé)
+            
+            const chargesLabel = acre === 'oui' ? 'Charges sociales (41% avec ACRE)' : 'Charges sociales (82%)';
+            document.getElementById('charges-label').textContent = chargesLabel;
+            document.getElementById('charges-sociales').textContent = formatEuro(chargesSociales);
+            document.getElementById('salaire-net').textContent = formatEuro(salaireNet);
+
+            // Total des charges
+            const chargesTotal = frais + autresCharges + salaireBrut + chargesSociales;
+            document.getElementById('charges-total').textContent = formatEuro(chargesTotal);
+
+            // Résultat avant IS
+            const resultatAvantIS = ca - chargesTotal;
+            document.getElementById('resultat-avant-is').textContent = formatEuro(resultatAvantIS);
+
+            // Calcul de l'IS (15% jusqu'à 42 500€, 25% au-delà)
+            let is15 = 0;
+            let is25 = 0;
+            if (resultatAvantIS <= 42500) {
+                is15 = resultatAvantIS * 0.15;
+            } else {
+                is15 = 42500 * 0.15;
+                is25 = (resultatAvantIS - 42500) * 0.25;
+            }
+            const isTotal = is15 + is25;
+            
+            document.getElementById('is-15').textContent = formatEuro(is15);
+            document.getElementById('is-25').textContent = formatEuro(is25);
+            document.getElementById('is-total').textContent = formatEuro(isTotal);
+
+            // Résultat après IS
+            const resultatApresIS = resultatAvantIS - isTotal;
+            document.getElementById('resultat-apres-is').textContent = formatEuro(resultatApresIS);
+
+            // Dividendes disponibles
+            const dividendesBruts = resultatApresIS;
+            const flatTax = dividendesBruts * 0.314; // 30% = 18,6% prélèvements sociaux + 12,8% IR
+            const dividendesNets = dividendesBruts - flatTax;
+
+            document.getElementById('dividendes-bruts').textContent = formatEuro(dividendesBruts);
+            document.getElementById('flat-tax').textContent = formatEuro(flatTax);
+            document.getElementById('dividendes-nets').textContent = formatEuro(dividendesNets);
+
+            // Calcul de l'IR sur salaire
+            const irResult = calculerIR(salaireNet);
+            document.getElementById('ir-salaire').textContent = formatEuro(irResult.total);
+            document.getElementById('taux-effectif').textContent = irResult.tauxEffectif.toFixed(1) + '%';
+            
+            // Affichage du détail des tranches
+            let detailsHTML = '';
+            for (let i = 0; i < irResult.details.length; i++) {
+                const d = irResult.details[i];
+                if (d.montant > 0 || i === 0) {
+                    const maxStr = d.max === Infinity ? '+' : formatEuro(d.max).replace(' €', '€');
+                    detailsHTML += `<div class="tax-bracket">${d.tranche} de ${formatEuro(d.min).replace(' €', '€')} à ${maxStr} : ${formatEuro(d.montant)}</div>`;
+                }
+            }
+            document.getElementById('tax-details').innerHTML = detailsHTML;
+
+            // Salaire net final
+            const salaireNetFinal = salaireNet - irResult.total;
+            document.getElementById('salaire-net-final').textContent = formatEuro(salaireNetFinal);
+
+            // Projections mensuelles du salaire
+            const salaireMensuelAvantIR = salaireNet / 12;
+            const salaireMensuelApresIR = salaireNetFinal / 12;
+            document.getElementById('salaire-mensuel-avant-ir').textContent = formatEuro(salaireMensuelAvantIR);
+            document.getElementById('salaire-mensuel-apres-ir').textContent = formatEuro(salaireMensuelApresIR);
+
+            // Revenu total disponible
+            const revenuTotal = salaireNetFinal + dividendesNets;
+            document.getElementById('revenu-total').textContent = formatEuro(revenuTotal);
+
+            // Revenu mensuel moyen
+            const revenuMensuel = revenuTotal / 12;
+            document.getElementById('revenu-mensuel').textContent = formatEuro(revenuMensuel);
+
+            // Résumé fiscal
+            const totalImpots = isTotal + irResult.total + flatTax + chargesSociales;
+            document.getElementById('total-impots').textContent = formatEuro(totalImpots);
+            
+            // Détail IS
+            document.getElementById('recap-is').textContent = formatEuro(isTotal);
+            const baseIS15 = Math.min(resultatAvantIS, 42500);
+            const baseIS25 = Math.max(0, resultatAvantIS - 42500);
+            document.getElementById('recap-is-15-base').textContent = formatEuro(baseIS15).replace(' €', '€');
+            document.getElementById('recap-is-15-montant').textContent = formatEuro(is15).replace(' €', '€');
+            document.getElementById('recap-is-25-base').textContent = formatEuro(baseIS25).replace(' €', '€');
+            document.getElementById('recap-is-25-montant').textContent = formatEuro(is25).replace(' €', '€');
+            
+            // Détail IR
+            document.getElementById('recap-ir').textContent = formatEuro(irResult.total);
+            document.getElementById('recap-taux-effectif').textContent = irResult.tauxEffectif.toFixed(1) + '%';
+            document.getElementById('recap-salaire-base').textContent = formatEuro(salaireNet).replace(' €', '€');
+            
+            // Détail Flat Tax
+            document.getElementById('recap-flat-tax').textContent = formatEuro(flatTax);
+            document.getElementById('recap-dividendes-base').textContent = formatEuro(dividendesBruts).replace(' €', '€');
+            
+            // Détail charges sociales
+            document.getElementById('recap-charges').textContent = formatEuro(chargesSociales);
+            document.getElementById('recap-taux-charges').textContent = (tauxCharges * 100).toFixed(0) + '%';
+            document.getElementById('recap-salaire-brut').textContent = formatEuro(salaireBrut).replace(' €', '€');
+            
+            // Taux d'imposition global
+            const tauxGlobal = ca > 0 ? (totalImpots / ca * 100) : 0;
+            document.getElementById('taux-global').textContent = tauxGlobal.toFixed(1) + '%';
+        }
+
+        // Event listeners
+        document.getElementById('tj').addEventListener('input', calculer);
+        document.getElementById('jours').addEventListener('input', calculer);
+        document.getElementById('frais').addEventListener('input', calculer);
+        document.getElementById('charges').addEventListener('input', calculer);
+        document.getElementById('salaire-brut').addEventListener('input', calculer);
+        document.getElementById('acre').addEventListener('change', calculer);
+
+        // Calcul initial
+        calculer();
+    </script>
+</body>
+</html>
